@@ -1,0 +1,432 @@
+// 27.1 Intro
+Key Point
+
+Hashing is super efficient.
+it takes O(1) time to search, inert, and delete an element using hashing.
+
+The preceding chapter introduced binary search tree.
+
+An element can be found in O(log n) time in a well-balanced sear tree.
+Is there a more efficient way to search for an element in a container?
+The chapter introduces a technique called hashing.
+You can use element in O(1) time.
+
+//27.2  What is Hashing
+Hashing uses a hashing function to map a key to an index.
+
+Before introducing hashing, let us review map,
+which is a data structure that is implemented using hashing
+Recall that a map (introduced in Section 21.5) is a container obj that stores entrie s.
+Each enrty contains two part: a key and a value.
+The key, also called a search key, is used to search for the corresponding values.
+For example, a dictionary can be stored in a map,
+in which the words are the keys and the defionitions of the words are the values.
+
+Note
+A map is also called a dictionary, a hash table, or an associative array.
+
+The java collections Framework defines the java.util.Map interface for modeling maps.
+Three concrete implementations are java.util.HashMap, java.util.LinkedHashMap, and java.util.TreeMap.
+java.util.HashMap is implemented using hashing,ava.util.LinkedHashMap using LinkedList, and java.util,TreeMap using red-black trees.
+(Bonus Chapter 41 will introduce red-black trees.)
+You will learn the concept of hashing and use it to implement a hash map in this chapter.
+
+If you know the index of an an element in the array, you can retrieve the element using the index in O(1) time.
+So does that mean we can store the values in an array and use the key as the index to find the value? The answer is yes-of you can map a key to an index. The array that stores the values is called a hash table. The function that maos a key to an index in the hash table.
+The function that maps a key to an index in the hash table is caolled a hash function. As shown in Figure 27.1, a hash function obtains an index from a key and uses the index to retrieve the value for the key. Hashing is a technique that retrieves the value usingt the index obtained from the key without performing a search
+
+Figure 27.1 A hash function maps a key to an index in the hash table
+
+How do you design a hash function that produces an index from a key?
+Ideally, we would like to design a function that maps each search key to a different index in the hash table.
+Such a function is called a perfect hash function.
+However, it is difficult to find a perfect hash function.
+However, it is difficult to find a perfect hash function.
+When two or more keys are mapped to the same hash value, we say a collision has occurred.
+Although there are ways to deal with collisions,
+which will be are disussed later in this chapter,
+it is better to avid collisions in the first place.
+Thus,
+you should design a fast
+and easy-to-compute hash function that minimizes collisions
+
+//27.3 Hash Function and Hash Codes
+Key Point
+A typical hash function first coverts a search key to an integer value called a hash code, then
+compresses the hash code into an index to the hash table.
+
+A hash code is a number generated from an object.
+This code allows an object to be stored/retrieved quickly in a hash table.
+Java's root class Object has the hashCode() methods, which returns an integer hash code.
+By default, the method returns the memory address for the object. The general contract for the hashCode method is as follows:
+
+	1. You should override the hashCode method whenever the equals method is overridden to ensure two equal objects returns the same hash code.
+
+	2. During the execution of a program, invoking the hashCode method multiple time returns the integer, provided that the objetc's date are not changed.
+
+	3. Two unequal objects may have the same hash code, but you should implement the hashCode method to avoid too many such cases.
+
+
+	27.3.1 Hash Codes for Primitive Types
+
+	For search keys of the type byte, short, int, and char, simply cast them to int.
+	Therefore, two different search keys of any of these tyoes will have different hash codes.
+
+	For a search key of the type float, use Float.floatToIntBits(key) as the hash code.
+	Note floatToIntBits(float f) return an in value whose bit representation is the same as the bit representation is the same as the bit representation for the floating number f.
+	Thus, two different search keys of the float type will have different hash codes.
+
+	For a search key of the type long, simply casting it to int would not be a good choice, because all keys that differ in only the first 32 bits will have the same hash code.
+	 To take the first 32 bits into consideration, divide the 64 bits into two halves and perform the exclusive-or operation to combine the two halves.
+	  This process is called folding. The hash code for a long key is
+
+	  int hashCode = (int)(key ^ (key >> 32));
+
+	  Note >> is the right-shift operator that shifts the bits 32 positions to the right.
+	   For ex, 1010110 >> 2 yields 0010101. The ^ is the bitwise exclusive-or operator.
+	    For ex, 1010110 ^ 0110111 yield 1100001.
+	     For more on bitwise operations, see appendix G, Bitwise Operations.
+
+	     72.3.2 Hash Coes for Strings
+	     Search keys are often strings, so it is important to design a good hash function for a string.
+	      An intuitive approach is to sum the Unicode of all characters as the hash code for the string.
+	      This approach may work if the search keys contain the same letter, such as tod and dot.
+	      	A better approach is to generate a hash code that takes the position of characters into consideraton.
+	      	 Specifically, let the hash code be
+
+	      	 													s0 * b^(n-1) + s1*b^(n-2) + ... sn-1
+
+	      	 	where si, is s.charAt(i). This expression is a polnomial for some positive b, so this called a polynomial hash code/ Using Horner's rule for polynomial evaluation (see Sec tion 6.7), the hash code can be calcu;ayed efficiently efficiently as follows:
+
+	      	 													(...((s0*b+s1)*b+s2)*b+...+sn-2)*b+sn-1
+
+	      	 	This computation can cause an overflow for long string, but arithmeric overflow is ignored in java. You should choose an appropriate calue b to minimize collisions. Experiments show that good choices for b are 31,33,37,39, and 41. In the String class, the hashCode is iverriddenm using polynomial hash code with b being 31.
+
+	      	 	27.3.3 Compressing Hash Codes
+
+	      	 	The hash code for a key can be a large integer that is out of the range for the hash-table index, so you need to scale it down to fit in the index's range.
+	      	 	 Assume the index for a hash table is between 0 and N-1.
+	      	 	  The most common way to scale an integer to a number between 0 N-1 is to use
+
+	      	 															index = hashCode % N
+	      	 	Ideally, you should choose a prime number for N to ensure the indices are pread evenly.
+	      	 	 However, it is time consuming to find a large prime number.
+	      	 	  In the have API implementation for java.util.HashMap, N is set to an integer power of 2.
+	      	 	   There is a good reason for this choice. When N is an int value power of 2, you can use the & operator to compress a hash code to an index on the hash table as follows:
+
+	      	 	   														index = hashCode & (N-1);
+
+	      	 index will be between 0 and N-1.
+	      	  The ampersand, &, is a bitwise AND operator (see Appendix G, Bitwise Operations).
+	      	   The AND of two corresponding bits yields a 1 if both bits are 1.
+	      	    For example, assume N = 4 and hashCode = 11.
+	      	     Thus, 11 & (4-1) == 1011 & 0011 = 0011.
+
+	      	To ensure the hashing is evenly distributed, a supplemental hash funcion is also used along with the primary hash function in the implementation of java.util.HashMap. This function is defined as
+
+	      			private static int supplementalHash(int h) {
+	      			h ^= (h >>> 20) ^ (h >>> 12);
+	      			return h ^ (h >>> 7) ^(h >>> 4);
+	      		}
+
+
+	      	^ and >> are bitwise exclusive-or and unsigned right-shift operations (see Appendix G). The bitwise operations are much faster than the multiplication, division, and remainder operations. You should replace theses operations with the bitwise operations whenever possible.
+
+	      	The complete hash function is defined as
+
+	      		h(hashCode) = supplementalHash(hashCode) & (N-1)
+
+	      		The supplemental hash function helps avoid collisions for two number with the same lower bits.
+	      		 For example, both 11100101 & 00000111 and 11001101 & 00000111 yield 00000111.
+	      		  But supplemntalHash(11100101) & 00000111 and suppplementalHash(11001101) & 00000111 will be different.
+	      		   Using a supplemental function reduces this type of collision.
+
+	      		   NOTE
+	      		   In java, an int is a 32-bit signed integer.
+	      		    The hashCode() method returns an int and it may be negative.
+	      		     If a ahse code is negative, hashCode() method returns an int and it may be negative.
+	      		      If a hash code is negative, hashCode & N would be negative.
+	      		       But hashCode & (N-1) will be non-negative for an int value N because anyInt & aNonNegativeInt is always non-negative.
+
+//27.4 Handling Collisions Using Open Addressing
+A collision occurs when two keys are mapped to the same index in a hash table.
+Generally, there are two ways for handling collision: open addressing and separate chaining.
+
+Open addressing is the process of finding an open location in the hash table in the event of a collision.
+Open addressing has several variations: linear probing, quadratic probing, and double hashing.
+
+
+27.4.1 Linear Probing
+When a collision occurs during the insertion of an entry to a hash table,
+linear probing finds the next available location sequentially.
+For example, if a collision occirs at hashTable[k % N], check weather hashTable[(k+1) % N] is availble.
+if not, check hashTable[(k+2) % N] and so on, until an available cell is found, as shown in Figure 27.2
+
+											Note
+		When probing reaches the end of the table, it goes back to the beginning of the table.
+		Thus, the hash table is treated as if it were circular.
+
+		To search for an entry in the hash table, obtain the index, say k, from the hash function for the key.
+		Check whether hashTable[k%N] contains the entry.
+		If not, check whether hashTable[(k+1) % N] contains the entry, and so on, until it is found, or an empty cell is reached
+
+		To remove an entry from the hash table, search the entry that matches the key.
+		 If the entry is found, place a special marker to denote that the entry is available.
+		  Each cell in the hash table has three possibole states: occupied, marked, or empty.
+		   Note a marked cell is also available for insertion.
+
+		   Linear probiong tend to cause groups of consecutive cells in the hash table to be occupied.
+		   Each group is called a cluster.
+		   Each cluster is actuall a probe sequence that you must search when retrueving, adding, or removing an entry.
+		   As cluster grow in size, they may amerge into even larger clusters, further slowing down the search time.
+		   This is a big disadvantage of linear probing.
+
+		   27.4.2 Quadratic Probing
+
+		   Quadratic probing can avoid the clustering problem that can occur in linear probing.
+		   Linear probing looks at the consecutive cells beginning at index k.
+		   Quadratic probing, on the other hand,
+		   looks at the cells in indices (k+j^2)%N, for j>0(inclusive),
+		   that is, k %N,(k+1)%N,(k+4)%n, (k+9)%N, and so on, as shown in Figure 27.4
+
+		   Quadratic probing works in the same way as linear probing except for a change in the search sequence, Quadratic probing avoids
+		   linear probing's clustering problem, but it has its own clusering problem, called secondary clustering; that is,
+		   the entries that collide with an occupied entry use the same proble sequence.
+
+		   Linear probing guarantees that an available cell an be found for inerting as long as the table is not full.
+		   However, there is no such guarantee for quadratic probing.
+
+		   27.4.3 Double Hashing
+		   Another open addressing scheme that avoids the clustering problem is known as double hashing.
+		   Starting from the initial index k, both linear probing and quadratic probing add an increment to k to define a search sequence.
+
+		   The increment is 1 for linear probing and j^2 for quadratic probing.
+		   These increments are independent of keys.
+		   Double hashing uses a secondary hash function h|(key) on keys to determine the increments to avoid the cluster problem.
+		   Specifically, double hashing looks at the cells at indices (k+j*h\(key)) % N, for j>0(inclusive), that is, k%N, (k+h\(key)) % N, (k+2*h\(key)) % N,(k+3*h\(key)) % N, and so on.
+
+		   For example, let the primary hash function h and secondary hash function h' on a hash table of size 11 be defined as follows:
+
+		   h(key) = key % 11;
+		   h|(key) = 7-key%7;
+
+		   for a search of 12, we have
+		   h(12) = 12 % 11 = 1;
+		   h|(12) = 7 - 12 % 7 = 2;
+
+		   Suppose the elements with the keys 45,58,4,28, and 21, are already placed in the hash table as shown in Figure 27.6.
+		   We now insert the element with key 12.
+		   The probe sequence for key 12 starts at index 1.
+		   Since the cell at 1 is already occupied, search the next cell at index 3 (1 +1 *2).
+		   Since the cell at index 3 is already occupied, search the next cell at index 5 (1 + 2 *2).
+		   Since the cell at index 5 is empty, the element for key 12 is now inserted at this cell.
+
+		   The indices of the probe sequence are as follows: 1,3,5,7,9,0,2,4,6,8,10.
+		   This sequence reaches the entire table.
+		   You should design your function to produce a probe sequence that reaches the entire table.
+		   Note the second function should never ave a zero value, since zero is not an increment.
+
+//27.5 Handling Collisions Using Separate Chaining
+Key Point
+
+The separate chaining scheme places all entries with the same hash index in the same location, rather than finding new location.
+Each location in the separate chaining scheme uses a bucket to hold multiple entries.
+
+The preceding section introduced handling collisions using open addressing.
+The open addressing scheme finds a new location when a collision occurs.
+This section introduces handling collisions using separate chaining.
+The separate chaining scheme places all entries with the same hash index into the same location, rather than finding new locations.
+Each location in the separate chaining scheme is called a bucket.
+A bucket is a container that holds multiple entries.
+
+You can implement a bucket using an array, ArrayList, LinkedList.
+
+We will use LinkedList for demonstration.
+
+You can view search cell in the hash table as the reference to head of a linked list,
+ and elements in the linked list are chained starting from the head, as shown in Figure 27.8
+//27.6 Load Factor and Rehashing
+Key Point
+
+The load factor measures how full a hash table is.
+
+If the load factor is exceeded, increase the hash-table size and reload the entries into a new larger hash table.
+
+This is called rehashing.
+
+Load factor λ (lambda) measures how full a hash table is.
+it is the ratio of the number of elements to the size of the hash table,
+that is, λ= n/N, where n denotes the number of elements and N the size of the hash table.
+
+Note λ is zero if the hash table is empty.
+FOr the open addressing scheme, λ is between 0 and 1; λ is 1 if the hash table is full.
+For the separate chaining scheme, λ can be any value.
+As λ increases, the probability of a collision also increases.
+Studies show you should maintain a load factor under 0.6 for the open addressing scheme and under 0.9 for the separate chaining scheme.
+
+Keeping the load factor under a certain threshold in important for the performance of hashing.
+in the implementation of java.util.HashMap class in java ApI, the threshold 0.75 is used.
+
+Whenever the load factor exceeds the threshold, you need to increase the hash-table size and rehash all the entries in the map into a new larger hash table.
+
+Notice you need to change the hash functions, since the hash-table size has been changed.
+
+To reduce the likely hood of rehashing, since it is costly, you should at least double the hash-table size.
+E
+ven with periodic rehashing, hashing is an effcient implementatiohn for map
+
+//27.7 Implementing a Map Using HAshing
+Key Point
+
+A map can be implemented using hashing.
+
+Now you understand the concept of hashing.
+You know how to design a good hash function to map a key to an index in a hash table,
+how to measure performance using the load factor, and how to increase the table size and rehash to maintain the performance.
+This section demonstrates how to implement a map using separate chaining.
+
+We design our custom Map interface to mirror java.util.Map and name the interface MyMap and a concrete class MyHashMap, as shown in Figure 27.10
+
+How do you implement MyHashMap?
+We will use an array for the hash table and each element in the hash table is a bucket.
+The bucket is a LinkedList.
+
+SEE MyHashMap.java
+
+Listing 27.1 shows the MyMap.java interface and Listing 27.2 implements MyHashMap.java using separate chaining
+
+The MyHashMap class implements the MyMap interface using separate chaining.
+The parameters that determine the hash-table size and load factors are defined in the class.
+The default initial capacity is 4 (line 5) and the maximum capacity is 2^30 (line 8).
+The current hash-table capacity is designed as a value of the power of 2 (line 11).
+The default load-factor threshold is 0.75f(line 14).
+
+You can specify a custom load-factor threshold when constructing a map.
+ The custom load-factor threshold is stored in loadFactorThreshold(line 17).
+  The data field size denotes the number of entries in the map (line 20).
+   The hash table is an array.
+    Each cell in the array is a linked list(line 23).
+     Three constructors are provided to construct a map.
+      You can construct a default map with the default capacity and load-factor
+       threshold using the no-arg constructor (line 26-28), a map with the specified capacity and a default load-factor
+        threshold (line 32-34), and a map with the specified capacity and load-factor threshold(line 38-46).
+
+
+
+The clear method removes all entries from the map (line 49-52).
+ It invokes removeEntries(), which deletes all entries in the buckets (line 221-227).
+  The removeEntries() method takes O (capacity) time to clear all the entries in the table.
+
+The containsKey(key) methods checks weather the specified key is in the map by invoking the get method (lines 55-60).
+ Since the get method takes O(1) time, the containsKey(key) method takes O(1) time.
+
+The containsValue(value) method checks wether the value is in the map (lines 63-74).This method takes O(capacity + sixe ) time.
+ It it actually O (capacity), since capacity > size.
+
+The entrySet() method returns a set that contains all entries in the map (line 77-90). This methods takes O (capacity) time.
+
+The get(key) method returns the value of the first entry woth the specified key (line 93-103). This method takes O(1) time.
+
+The isEmpty() methods simply returns true of the the map is empty(line 106-108). this method takes O(1) time.
+
+
+The keySet() methods returns all keys in the maps as a set.
+ The method finds the kesy from each bucket and adds them to a set (line 111-123).
+  This takes O(capacity) time.
+
+  The put(key,value) method adds a new entry into the map.
+   The method first tests if the key is already in the map (line 127), if so, it locates the entry and replaces the old value with the new value in the entry for the key (line 134) and the odd value is returned (line 136).
+    If the key is new in the map, the new entry is created in the map (line 156).
+     Before inserting the new entry, the method checks whether the size exceeds the load-factor threshold (line 141).
+      If so the program invokes rehash() (line 145) to increase the capacity and sotre entries into a new larger hash table.
+
+The rehash() method first copies all entries in a set(line 231), doubles the capacity (line 232), creates a new hash table (line 233), and resets the size to 0 (line 234).
+ The method then copies the entries into the new hash table (lines 236-238).
+  The rehash method takes O(capacity) time.
+   If no rehash is performed, the put method takes O(1) time to add a new entry.
+
+The remove(key) method removes the entry with the specified key in the map (lines 164 - 177).
+ This method takes O(1) time.
+
+The size() methods simply returns the size of the map (lines 180-182) This method takes O(1) time.
+
+The values() methods return all values in the map.
+ The method examines each from all buckets and adds it to a set (lines 185-197).
+  This method takes O(capacity) time.
+
+The hash() method invokes the supplementalHash to ensure the hashing is evanly distrubuted to produce an index for the hash table (line 200 - 208). This method takes O(1) time.
+
+
+			METHODS																TIME
+		clear()																O(capacity) (DONE)
+		ContainsKey(key: Key)												O(1)
+		ContainsValue(value: V)												O(capacity)
+		entrySet()															O(capacity)
+		get(key:R)															O(1)
+		isEmpty()															O(1)
+		keySet()												        	O(capacity)
+		put(key: K, value: V)												O(1)
+		remove(key: R)														O(1)
+		size()																O(1)
+		values()															O(capacity)
+		rehash()															O(capacity)
+
+
+Since rehashing does not happen very ofter the time complexity for the put method is O(1).
+ Note the complexities of the clear ,entrySet ,keySet ,values , and rehash methods depend on capacity,
+  so to avoid poor performance for these methods, you should choose an initial capacity carefully.
+
+  Listing 27.3 gives a test program that uses MyHashMap
+
+  SEE TestMyHashMap.java
+
+  	OutPut :
+  		+		Entries in map: [[Anderson, 31][Smith,65][Lewis,29][Cook,29]]
+  				The age for Lewis is 29
+  				Is Smith in the map? true
+  				Is age 33 in the map? false
+  				Entries in map: [[Anderson, 31][Lewis, 29][cook,29]]
+  				Entries in map:[]
+
+The program creates a map using MyHashMap (line 4) and adds five entries into the map (lines 5-9).
+ Lines 5 adds key Smith with value 30 and line 9 adds Smith with value 65.
+  The latter value replaces the former value.
+   The map actually has only four entries.
+    The program displays the entries in the map (line 11), gets a value for a key (line 14),
+     checks whether the map contains the key (line 17) and a value (line 19), removes an entry with the key Smith (line 21) and,
+      redisplays the entries in the map (line 22).
+       Finally, the program clears the map (line 24) and fisplays an empty map (line 25)
+
+//27.8 Implementing Set Using Hashing
+Key Point
+
+	A hash set can be implemented using a hash map.
+
+A set (introduced in Chapter 21) is a date structure that stores distinct values.
+ The Java Collections Framework defines the java.util.Set interface for modeling sets.
+  Three concrete implementations are java.util.HashSet, java.util.LinkedHashSet using LinkedList,
+   and java.util.TreeSet using binary search trees.
+
+   You can implement MyHashSet using the same approach as for implementing MyHashMap.
+    The only difference is that key/value pairs are stored in the map, while elements are stored in the set.
+
+    Sine all the methods in HashSet are inherited from Collecion, we design our cusion HashSet by implementing the Collection interface,
+     as shown in Figure 27.11
+
+     Figure 27.11 MyHashSet implements the Collections interface
+
+     <<interface>>
+    javc.lang.Collecion<E>
+
+    		^
+    		|
+    	MyHashSet<E>
+    		|
+    +MyHashSet()------------------------------------------- Creates an empty set with default capacity 4 and default load-factor threshold 0.75f
+
+    +MyHashMap(capacity: int) ----------------------------- Creates a set with a specified capacity and default load factor threshold 0.75f
+
+    +MyHashMap(capacityL int, loadFactorThreshold: float) - Creates a set with a specified capacity and load-factor threshold
+
+
+    SEE MyHashSet.java

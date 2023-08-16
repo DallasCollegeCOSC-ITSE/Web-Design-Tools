@@ -1,0 +1,23 @@
+double theta = calculateNewVelocityAngle(rightPaddle);
+				
+				double newVx = (Math.cos(theta)) * vx;	//ballspeed
+				double newVY = (-Math.sin(theta)) * vy;     //ballspeed
+				
+				double oldSign = Math.signum(vx);
+				
+				this.vx = newVx * (-1.0 * oldSign);
+				this.vy = newVY;
+				
+				public double calculateNewVelocityAngle(Rect paddle)
+	{
+		double relativeIntersectY = (paddle.y+(paddle.height /2.0)) - (this.rect.y + (this.rect.y /2));
+		
+		double normalIntersectY = relativeIntersectY / (paddle.height / 2);
+		
+		double theta = normalIntersectY*MAX_ANGLE;
+		
+		return Math.toRadians(theta);
+	}
+	
+	
+}

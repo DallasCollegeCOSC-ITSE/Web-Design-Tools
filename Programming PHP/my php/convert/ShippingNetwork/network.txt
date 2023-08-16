@@ -1,0 +1,83 @@
+#network
+#id start	end	 cost	time	type
+1	Brecha	Abaca	2	2	road
+2	Abaca	Brecha	2	2	road
+3	Abaca	Chiano	1	2	road
+4	Chiano	Brecha	1	2	road
+5	Dolton	Brecha	5	8	road
+6	Brecha	Dolton	5	8	road
+7	Abaca	Islando	8	10	water
+8	Chiano	Haltom	6	9	water
+9	Haltom	Islando	6	9	water
+10	Islando	Chiano	5	7	water
+11	Lydia	Kyton	23	3	air
+12	Abaca	Edwards	20	3	air
+13	Edwards	Abaca	20	3	air
+14	Edwards	Dolton	5	8	road
+15	Dolton	Fiskal	2	2	train
+16	Fiskal	Edwards	4	5	road
+17	Edwards	Gram	6	7	road
+18	Gram	Fiskal	2	3	road
+19	Haltom	Edwards	8	10	road
+20	Edwards	Haltom	8	10	road
+21	Fiskal	Jeku	5	8	road
+22	Fiskal	Jeku	1	1	train
+23	Dolton	Jeku	4	6	road
+24	Dolton	Kyton	2	2	train
+25	Kyton	Dolton	1	1	train
+26	Jeku	Kyton	3	2	train
+27	Jeku	Lydia	2	4	road
+28	Lydia	Fiskal	6	10	road
+29	Edwards	Midoria	16	2	air
+30	Kyton	Abaca	14	2	air
+31	Midoria	Lydia	18	2	air
+32	Gram	Nandai	4	6	road
+33	Nandai	Haltom	4	5	road
+34	Abaca	Oda	4	3	road
+35	Oda	Abaca	4	3	road
+36	Islando	Oda	8	12	water
+37	Oda	Kyton	4	8	water
+38	Kyton	Abaca	3	6	water
+39	Midoria	Fiskal	3	2	train
+
+#vehicles
+#type	Name	starting location (they have to start somewhere)
+train	Express	Kyton
+train	Shinkansen	Dolton
+air	PuddleJumper	Edwards
+water	Trident	Haltom
+water	fune	Islando
+road	Rider	Abaca
+road	Ronin	Brecha
+road	RoadWarrior	Gram
+road	Hotrod	Edwards
+road	DieselBuddy	Jeku
+
+#cargo list
+#time,	name,	source,	destination,	wt
+0,	Bob's Cargo,	Abaca,	Dolton,	1
+1,	Bob's Cargo,	Nandi,	Oda, 3
+1,	ABC Chemicals,	Jeku,	Edwards, 18
+1,	InterPlast,	Kyton,	Midoria,	4
+2,	Bob's Cargo,	Fiskal,	Brecha,	2
+2,	IIAE,	Oda,	Abaca,	1
+2,	ABC Chemicals,	Jeku,	Lydia,	14
+2,	Nautalis LLC,	Islando,	Haltom,	1
+2,	Nautalis LLC,	Islando,	Edwards,	2
+2,	Bob's Cargo,	Abaca,	Midoria,	1
+2,	IIAE,	Chiano,	Kyton,	2
+2,	Ryder Systems,	Edwards,	Dolton,	1
+2,	Live Automotives,	Gram,	Jeku,	2
+3,	EMCOR Holdings,	Edwards,	Kyton,	47
+3,	IIAE,	Lydia,	Fiskal,	2
+3,	Bob's Cargo,	Abaca,	Haltom,	7
+4,	IIAE, Oda, Chiano,	2
+4,	EMCOR Holdings,	Abaca,	Edwards, 22
+4,	Bob's Cargo,	Oda,	Kyton,	2
+4,	ABC Chemicals,	Jeku,	Edwards, 9
+4,	InterPlast,	Kyton,	Midoria,	4
+5,	Bob's Cargo,	Fiskal,	Brecha,	3
+5,	Nautalis LLC,	Islando,	Abaca,	1
+5,	ABC Chemicals,	Jeku,	Islando, 3
+6,	InterPlast,	Abaca,	Midoria,	4
+6,	ABC Chemicals,	Brecha,	Lydia,	2
